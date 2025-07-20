@@ -183,7 +183,6 @@ function Library:CreateTab(name)
 					if callback then callback(state) end
 				end)
 				
-				-- Execute callback with default value
 				if callback and default then
 					callback(default)
 				end
@@ -240,7 +239,6 @@ function Library:CreateTab(name)
 					end
 				end)
 				
-				-- Execute callback with default value
 				if callback then
 					callback(default)
 				end
@@ -266,7 +264,6 @@ function Library:CreateTab(name)
 					if callback then callback(options[i]) end
 				end)
 				
-				-- Execute callback with default value
 				if callback then
 					callback(default)
 				end
@@ -313,7 +310,6 @@ function Library:CreateTab(name)
 
 		TabModules[#TabModules+1] = Module
 		
-		-- Execute module callback with default value if module is enabled by default
 		if callback and ModuleToggle then
 			callback(ModuleToggle)
 		end
