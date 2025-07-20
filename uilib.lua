@@ -1,7 +1,7 @@
 local Library = {}
 Library.Tabs = {}
 
-local ConfigSystem = loadstring(game:HttpGet(https://pastebin.com/raw/AhemWPCp"))()
+local ConfigSystem = loadstring(game:HttpGet("https://pastebin.com/raw/AhemWPCp"))()
 		
 function Library:CreateTab(name)
 	local Tab = {}
