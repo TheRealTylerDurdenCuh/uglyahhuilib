@@ -182,6 +182,10 @@ function Library:CreateTab(name)
 					btn.BackgroundColor3 = state and Color3.fromRGB(143, 229, 255) or Color3.fromRGB(27, 27, 27)
 					if callback then callback(state) end
 				end)
+				
+				if callback and default then
+					callback(default)
+				end
 
 			elseif settingType == "Slider" then
 				local min = settingData.Min or 0
@@ -234,6 +238,11 @@ function Library:CreateTab(name)
 						if callback then callback(val) end
 					end
 				end)
+				
+				-- Execute callback with default value
+				if callback then
+					callback(default)
+				end
 
 			elseif settingType == "Dropdown" then
 				local options = settingData.Options or {}
@@ -255,6 +264,10 @@ function Library:CreateTab(name)
 					btn.Text = " " .. name .. ": " .. options[i]
 					if callback then callback(options[i]) end
 				end)
+				
+				if callback then
+					callback(default)
+				end
 			end
 		end
 
@@ -297,6 +310,11 @@ function Library:CreateTab(name)
 		end
 
 		TabModules[#TabModules+1] = Module
+		
+		if callback and ModuleToggle then
+			callback(ModuleToggle)
+		end
+		
 		return Settings
 	end
 
