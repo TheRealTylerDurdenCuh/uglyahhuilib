@@ -1,6 +1,8 @@
 local Library = {}
 Library.Tabs = {}
 
+local ConfigSystem = loadstring(game:HttpGet(https://pastebin.com/raw/AhemWPCp"))()
+		
 function Library:CreateTab(name)
 	local Tab = {}
 	local TabModules = {}
@@ -40,6 +42,11 @@ function Library:CreateTab(name)
 		local modulename = moduleData.Name
 		local callback = moduleData.Callback
 		local ModuleToggle = moduleData.Default or false
+		
+		local moduleId = nil
+		if _G.ConfigSystem then
+			moduleId = _G.ConfigSystem:RegisterModule(modulename, callback, ModuleToggle)
+		end
 		
 		local Module = Instance.new("Frame", Maintab)
 		Module.AutomaticSize = Enum.AutomaticSize.Y
@@ -92,6 +99,11 @@ function Library:CreateTab(name)
 			else
 				Module.BackgroundColor3 = Color3.fromRGB(27, 27, 27)
 			end
+			
+			if _G.ConfigSystem and moduleId then
+				_G.ConfigSystem:UpdateState(moduleId, ModuleToggle, true)
+			end
+			
 			if callback then
 				callback(ModuleToggle)
 			end
@@ -114,6 +126,11 @@ function Library:CreateTab(name)
 			local settingType = settingData.Type
 			local name = settingData.Name
 			local callback = settingData.Callback
+			
+			local settingId = nil
+			if _G.ConfigSystem and moduleId then
+				settingId = _G.ConfigSystem:RegisterSetting(moduleId, name, settingType, callback, settingData.Default)
+			end
 
 			if settingType == "Keybind" then
 				local b = Instance.new("TextButton", settingslist)
@@ -140,6 +157,11 @@ function Library:CreateTab(name)
 					local key = input.KeyCode.Name
 					b.Text = " " .. name .. ": " .. key
 					assignedKey = key
+					
+					if _G.ConfigSystem and settingId then
+						_G.ConfigSystem:UpdateState(moduleId .. ":" .. settingId, key, false)
+					end
+					
 					if callback then callback(key) end
 					listening = false
 				end)
@@ -180,6 +202,11 @@ function Library:CreateTab(name)
 				btn.MouseButton1Click:Connect(function()
 					state = not state
 					btn.BackgroundColor3 = state and Color3.fromRGB(143, 229, 255) or Color3.fromRGB(27, 27, 27)
+					
+					if _G.ConfigSystem and settingId then
+						_G.ConfigSystem:UpdateState(moduleId .. ":" .. settingId, state, false)
+					end
+					
 					if callback then callback(state) end
 				end)
 				
@@ -235,11 +262,15 @@ function Library:CreateTab(name)
 						pos = math.clamp(pos, 0, 1)
 						fill.Size = UDim2.new(pos, 0, 1, 0)
 						local val = math.floor(min + (max - min) * pos)
+						
+						if _G.ConfigSystem and settingId then
+							_G.ConfigSystem:UpdateState(moduleId .. ":" .. settingId, val, false)
+						end
+						
 						if callback then callback(val) end
 					end
 				end)
 				
-				-- Execute callback with default value
 				if callback then
 					callback(default)
 				end
@@ -262,6 +293,11 @@ function Library:CreateTab(name)
 					i += 1
 					if i > #options then i = 1 end
 					btn.Text = " " .. name .. ": " .. options[i]
+					
+					if _G.ConfigSystem and settingId then
+						_G.ConfigSystem:UpdateState(moduleId .. ":" .. settingId, options[i], false)
+					end
+					
 					if callback then callback(options[i]) end
 				end)
 				
@@ -310,7 +346,7 @@ function Library:CreateTab(name)
 		end
 
 		TabModules[#TabModules+1] = Module
-		
+	
 		if callback and ModuleToggle then
 			callback(ModuleToggle)
 		end
