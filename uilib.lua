@@ -6,21 +6,21 @@ arraylist.Name = "Array"
 
 local UIList = Instance.new("UIListLayout")
 UIList.SortOrder = Enum.SortOrder.LayoutOrder
-UIList.Padding = UDim.new(0, 4)
+UIList.Padding = UDim.new(0, 2)
+UIList.HorizontalAlignment = Enum.HorizontalAlignment.Right
 
 local container = Instance.new("Frame", arraylist)
 container.Position = UDim2.new(1, -10, 0, 100)
-container.Size = UDim2.new(0, 180, 1, -100)
+container.Size = UDim2.new(0, 250, 1, -100)
 container.AnchorPoint = Vector2.new(1, 0)
 container.BackgroundTransparency = 1
-container.ClipsDescendants = true
+container.ClipsDescendants = false
 UIList.Parent = container
 
 local activeModules = {}
 
 local function createLabel(text)
 	local textService = game:GetService("TextService")
-	
 	local textBounds = textService:GetTextSize(text, 17, Enum.Font.SourceSans, Vector2.new(math.huge, 20))
 	local labelWidth = textBounds.X + 10
 	
@@ -33,8 +33,8 @@ local function createLabel(text)
 
 	local gradient = Instance.new("UIGradient", holder)
 	gradient.Color = ColorSequence.new{
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(143, 229, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 180, 255))
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 180, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(143, 229, 255))
 	}
 	gradient.Rotation = 45
 
@@ -47,6 +47,7 @@ local function createLabel(text)
 	shadow.BackgroundTransparency = 1
 	shadow.Text = text
 	shadow.TextColor3 = Color3.new(0, 0, 0)
+	shadow.TextTransparency = 0.7
 	shadow.Font = Enum.Font.SourceSans
 	shadow.TextSize = 17
 	shadow.TextXAlignment = Enum.TextXAlignment.Center
@@ -76,7 +77,7 @@ local function updateArray()
 	end
 	
 	table.sort(sortedModules, function(a, b)
-		return string.len(a) > string.len(b)
+		return #a > #b
 	end)
 	
 	for i, name in ipairs(sortedModules) do
@@ -197,7 +198,7 @@ function Library:CreateTab(name)
 			end
 			updateArray()
 		end
-
+		
 		if callback then 
 			callback(ModuleToggle) 
 		end
