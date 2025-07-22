@@ -19,9 +19,27 @@ UIList.Parent = container
 local activeModules = {}
 
 local function createLabel(text)
+	local textService = game:GetService("TextService")
+	
+	local textBounds = textService:GetTextSize(text, 17, Enum.Font.SourceSans, Vector2.new(math.huge, 20))
+	local labelWidth = textBounds.X + 10
+	
 	local holder = Instance.new("Frame")
-	holder.Size = UDim2.new(1, 0, 0, 22)
-	holder.BackgroundTransparency = 1
+	holder.Size = UDim2.new(0, labelWidth, 0, 20)
+	holder.Position = UDim2.new(1, -labelWidth, 0, 0)
+	holder.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	holder.BackgroundTransparency = 0.3
+	holder.BorderSizePixel = 0
+
+	local gradient = Instance.new("UIGradient", holder)
+	gradient.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(143, 229, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 180, 255))
+	}
+	gradient.Rotation = 45
+
+	local corner = Instance.new("UICorner", holder)
+	corner.CornerRadius = UDim.new(0, 3)
 
 	local shadow = Instance.new("TextLabel", holder)
 	shadow.Size = UDim2.new(1, 0, 1, 0)
@@ -29,18 +47,20 @@ local function createLabel(text)
 	shadow.BackgroundTransparency = 1
 	shadow.Text = text
 	shadow.TextColor3 = Color3.new(0, 0, 0)
-	shadow.Font = Enum.Font.SourceSansBold
-	shadow.TextSize = 16
-	shadow.TextXAlignment = Enum.TextXAlignment.Right
+	shadow.Font = Enum.Font.SourceSans
+	shadow.TextSize = 17
+	shadow.TextXAlignment = Enum.TextXAlignment.Center
+	shadow.TextYAlignment = Enum.TextYAlignment.Center
 
 	local label = Instance.new("TextLabel", holder)
 	label.Size = UDim2.new(1, 0, 1, 0)
 	label.BackgroundTransparency = 1
 	label.Text = text
-	label.TextColor3 = Color3.fromRGB(143, 229, 255)
-	label.Font = Enum.Font.SourceSansBold
-	label.TextSize = 16
-	label.TextXAlignment = Enum.TextXAlignment.Right
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.Font = Enum.Font.SourceSans
+	label.TextSize = 17
+	label.TextXAlignment = Enum.TextXAlignment.Center
+	label.TextYAlignment = Enum.TextYAlignment.Center
 
 	return holder
 end
@@ -49,8 +69,20 @@ local function updateArray()
 	for _, c in ipairs(container:GetChildren()) do
 		if c:IsA("Frame") then c:Destroy() end
 	end
+	
+	local sortedModules = {}
 	for _, name in ipairs(activeModules) do
-		createLabel(name).Parent = container
+		table.insert(sortedModules, name)
+	end
+	
+	table.sort(sortedModules, function(a, b)
+		return string.len(a) > string.len(b)
+	end)
+	
+	for i, name in ipairs(sortedModules) do
+		local label = createLabel(name)
+		label.Parent = container
+		label.LayoutOrder = i
 	end
 end
 
@@ -165,7 +197,7 @@ function Library:CreateTab(name)
 			end
 			updateArray()
 		end
-		
+
 		if callback then 
 			callback(ModuleToggle) 
 		end
