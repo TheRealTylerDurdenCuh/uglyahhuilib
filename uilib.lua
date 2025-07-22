@@ -1,6 +1,59 @@
 local Library = {}
 Library.Tabs = {}
 
+local arraylist = Instance.new("ScreenGui", game:GetService("CoreGui"))
+arraylist.Name = "Array"
+
+local UIList = Instance.new("UIListLayout")
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Padding = UDim.new(0, 4)
+
+local container = Instance.new("Frame", arraylist)
+container.Position = UDim2.new(1, -10, 0, 100)
+container.Size = UDim2.new(0, 180, 1, -100)
+container.AnchorPoint = Vector2.new(1, 0)
+container.BackgroundTransparency = 1
+container.ClipsDescendants = true
+UIList.Parent = container
+
+local activeModules = {}
+
+local function createLabel(text)
+	local holder = Instance.new("Frame")
+	holder.Size = UDim2.new(1, 0, 0, 22)
+	holder.BackgroundTransparency = 1
+
+	local shadow = Instance.new("TextLabel", holder)
+	shadow.Size = UDim2.new(1, 0, 1, 0)
+	shadow.Position = UDim2.new(0, 1, 0, 1)
+	shadow.BackgroundTransparency = 1
+	shadow.Text = text
+	shadow.TextColor3 = Color3.new(0, 0, 0)
+	shadow.Font = Enum.Font.SourceSansBold
+	shadow.TextSize = 16
+	shadow.TextXAlignment = Enum.TextXAlignment.Right
+
+	local label = Instance.new("TextLabel", holder)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = Color3.fromRGB(143, 229, 255)
+	label.Font = Enum.Font.SourceSansBold
+	label.TextSize = 16
+	label.TextXAlignment = Enum.TextXAlignment.Right
+
+	return holder
+end
+
+local function updateArray()
+	for _, c in ipairs(container:GetChildren()) do
+		if c:IsA("Frame") then c:Destroy() end
+	end
+	for _, name in ipairs(activeModules) do
+		createLabel(name).Parent = container
+	end
+end
+
 function Library:CreateTab(name)
 	local Tab = {}
 	local TabModules = {}
@@ -87,14 +140,34 @@ function Library:CreateTab(name)
 
 		local function toggleModule()
 			ModuleToggle = not ModuleToggle
+			Module.BackgroundColor3 = ModuleToggle and Color3.fromRGB(143, 229, 255) or Color3.fromRGB(27, 27, 27)
+
 			if ModuleToggle then
-				Module.BackgroundColor3 = Color3.fromRGB(143, 229, 255)
+				if not table.find(activeModules, modulename) then
+					table.insert(activeModules, modulename)
+				end
 			else
-				Module.BackgroundColor3 = Color3.fromRGB(27, 27, 27)
+				local index = table.find(activeModules, modulename)
+				if index then
+					table.remove(activeModules, index)
+				end
 			end
+			updateArray()
+
 			if callback then
 				callback(ModuleToggle)
 			end
+		end
+
+		if ModuleToggle then
+			if not table.find(activeModules, modulename) then
+				table.insert(activeModules, modulename)
+			end
+			updateArray()
+		end
+		
+		if callback then 
+			callback(ModuleToggle) 
 		end
 
 		ModuleButton.MouseButton1Click:Connect(toggleModule)
@@ -310,10 +383,6 @@ function Library:CreateTab(name)
 
 		TabModules[#TabModules+1] = Module
 		
-		if callback and ModuleToggle then
-			callback(ModuleToggle)
-		end
-		
 		return Settings
 	end
 
@@ -326,80 +395,5 @@ function Library:CreateTab(name)
 
 	self.Tabs[#self.Tabs+1] = Tab
 	return Tab
-end
-
-local arraylist = Instance.new("ScreenGui", game:GetService("CoreGui"))
-arraylist.Name = "WaveArraylist"
-
-local UIList = Instance.new("UIListLayout")
-UIList.SortOrder = Enum.SortOrder.LayoutOrder
-UIList.Padding = UDim.new(0, 4)
-
-local container = Instance.new("Frame", arraylist)
-container.Position = UDim2.new(1, -10, 0, 100)
-container.Size = UDim2.new(0, 180, 1, -100)
-container.AnchorPoint = Vector2.new(1, 0)
-container.BackgroundTransparency = 1
-container.ClipsDescendants = true
-UIList.Parent = container
-
-local activeModules = {}
-
-local function createLabel(text)
-	local holder = Instance.new("Frame")
-	holder.Size = UDim2.new(1, 0, 0, 22)
-	holder.BackgroundTransparency = 1
-
-	local shadow = Instance.new("TextLabel", holder)
-	shadow.Size = UDim2.new(1, 0, 1, 0)
-	shadow.Position = UDim2.new(0, 1, 0, 1)
-	shadow.BackgroundTransparency = 1
-	shadow.Text = text
-	shadow.TextColor3 = Color3.new(0, 0, 0)
-	shadow.Font = Enum.Font.SourceSansBold
-	shadow.TextSize = 16
-	shadow.TextXAlignment = Enum.TextXAlignment.Right
-
-	local label = Instance.new("TextLabel", holder)
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.Text = text
-	label.TextColor3 = Color3.fromRGB(143, 229, 255)
-	label.Font = Enum.Font.SourceSansBold
-	label.TextSize = 16
-	label.TextXAlignment = Enum.TextXAlignment.Right
-
-	return holder
-end
-
-local function updateArray()
-	for _, c in ipairs(container:GetChildren()) do
-		if c:IsA("Frame") then c:Destroy() end
-	end
-	for _, name in ipairs(activeModules) do
-		createLabel(name).Parent = container
-	end
-end
-
-local oldCreateTab = Library.CreateTab
-function Library:CreateTab(name)
-	local tab = oldCreateTab(self, name)
-	local oldAdd = tab.AddModule
-
-	function tab:AddModule(data)
-		local cb = data.Callback
-		data.Callback = function(state)
-			if state then
-				table.insert(activeModules, data.Name)
-			else
-				table.remove(activeModules, table.find(activeModules, data.Name))
-			end
-			updateArray()
-			if cb then cb(state) end
-		end
-		return oldAdd(self, data)
-	end
-
-	return tab
 end
 return Library
